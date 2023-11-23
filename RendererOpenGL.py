@@ -6,6 +6,7 @@ import glm
 from gl import Renderer
 from model import Model
 from shaders import *
+from math import pi,sin,cos
 
 width = 960
 height = 540
@@ -24,15 +25,27 @@ rend.createSkybox(skyBoxTextures,skybox_vertex_shader,skybox_fragment_shader)
 rend.setShaders(vertex_shader,siren_shader)
 
 modelo = Model(filename="models/toonRocket.obj",translate=glm.vec3(0,0,-5),rotation=glm.vec3(0,0,0),scale=glm.vec3(1,1,1))
-modelo.loadTexture("textures/toonRocket.bmp")
+modelo.loadTexture("textures/rocket.bmp")
 
 rend.scene.append(modelo)
 
+rend.camPosition = glm.vec3(modelo.translate.xy,0)
 rend.target = modelo.translate
+rend.camAngle = 0.0
+rend.camRadio = abs(modelo.translate.z)
+
+#Musica
+pygame.mixer.music.load("music/music.wav")
+pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.3)
+
+shot_sound = pygame.mixer.Sound("music/shot.wav")
+shot_sound.set_volume(0.3)
 
 isRunning = True
 while isRunning:
     deltaTime = clock.tick(60)/1000
+    
     
     keys = pygame.key.get_pressed()
     
@@ -48,27 +61,46 @@ while isRunning:
                 
             elif event.key==pygame.K_1:
                 rend.setShaders(vertex_shader,siren_shader);
+                shot_sound.play()
             elif event.key==pygame.K_2:
                 rend.setShaders(vertex_shader,stripes_shader);
+                shot_sound.play()
             elif event.key==pygame.K_3:
                 rend.setShaders(vertex_shader,pencil_shader);
+                shot_sound.play()
             elif event.key==pygame.K_4:
                 rend.setShaders(vertex_shader,dot_shader);
+                shot_sound.play()
     
     if keys[K_d]:
-        rend.camPosition.x += 5 * deltaTime #5 unidades por segundo
+        if rend.camAngle==360:
+            rend.camAngle=0.0
+            
+        rend.camAngle += 1
+        rend.camPosition.x = rend.target.x+rend.camRadio*sin(rend.camAngle*pi/180)
+        rend.camPosition.z = rend.target.z+rend.camRadio*cos(rend.camAngle*pi/180)
     elif keys[K_a]:
-        rend.camPosition.x -= 5 * deltaTime
-        
+        if rend.camAngle==-360:
+            rend.camAngle=0.0
+            
+        rend.camAngle -= 1
+        rend.camPosition.x = rend.target.x+rend.camRadio*sin(rend.camAngle*pi/180)
+        rend.camPosition.z = rend.target.z+rend.camRadio*cos(rend.camAngle*pi/180)
     if keys[K_w]:
-        rend.camPosition.z -= 5 * deltaTime
+        if rend.camPosition.z>-1:
+            rend.camPosition.z -= 5 * deltaTime
+            rend.camRadio = abs(modelo.translate.z)+rend.camPosition.z
     elif keys[K_s]:
-        rend.camPosition.z += 5 * deltaTime
+        if rend.camPosition.z<5:
+            rend.camPosition.z += 5 * deltaTime
+            rend.camRadio = abs(modelo.translate.z)+rend.camPosition.z
         
     if keys[K_g]:
-        rend.camPosition.y += 5 * deltaTime
+        if rend.camPosition.y<5:
+            rend.camPosition.y += 5 * deltaTime
     elif keys[K_e]:
-        rend.camPosition.y -= 5 * deltaTime
+        if rend.camPosition.y>-5:
+            rend.camPosition.y -= 5 * deltaTime
 
     if keys[K_UP]:
         if rend.fatness<1.0:

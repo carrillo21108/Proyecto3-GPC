@@ -24,7 +24,10 @@ class Renderer(object):
         glViewport(0,0,self.width,self.height)
         
         self.elapsedTime = 0.0
+        
         self.target = glm.vec3(0,0,0)
+        self.camAngle = 0.0
+        self.camRadio = 0.0
         
         self.fatness = 0.0
         
