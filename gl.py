@@ -29,7 +29,7 @@ class Renderer(object):
         self.camAngle = 0.0
         self.camRadio = 0.0
         
-        self.fatness = 0.0
+        self.fatnessFrecuency = 1.0
         
         self.filledMode = True
         
@@ -38,12 +38,12 @@ class Renderer(object):
         self.activeShader = None
         self.skyboxShader = None
         
-        self.dirLight = glm.vec3(1,0,0)
-        
         #View Matrix
         self.camPosition = glm.vec3(0,0,0)
         self.camRotation = glm.vec3(0,0,0)
         self.viewMatrix = self.getViewMatrix()
+        
+        self.dirLight = glm.vec3(glm.normalize(-self.viewMatrix[2].xyz))
         
         #Projection matrix
         self.projectionMatrix = glm.perspective(glm.radians(60),#FOV
@@ -171,9 +171,9 @@ class Renderer(object):
         
         rotationMat = pitch*yaw*roll
         
-        camMatrix = translateMat*rotationMat
+        self.camMatrix = translateMat*rotationMat
         
-        return glm.inverse(camMatrix)
+        return glm.inverse(self.camMatrix)
     
     def setShaders(self,vertexShader,fragmentShader):
         if vertexShader is not None and fragmentShader is not None:
@@ -183,6 +183,7 @@ class Renderer(object):
             
     def update(self):
         self.viewMatrix = glm.lookAt(self.camPosition,self.target,glm.vec3(0,1,0))
+        self.dirLight = glm.vec3(glm.normalize(-self.viewMatrix[2].xyz))
         
     def render(self):
         glClearColor(self.clearColor[0],self.clearColor[1],self.clearColor[2],1)
@@ -197,7 +198,7 @@ class Renderer(object):
             glUniformMatrix4fv(glGetUniformLocation(self.activeShader,"projectionMatrix"),
                                                     1,GL_FALSE,glm.value_ptr(self.projectionMatrix))
             glUniform1f(glGetUniformLocation(self.activeShader,"time"),self.elapsedTime)
-            glUniform1f(glGetUniformLocation(self.activeShader,"fatness"),self.fatness)
+            glUniform1f(glGetUniformLocation(self.activeShader,"fatnessFrecuency"),self.fatnessFrecuency)
             glUniform3fv(glGetUniformLocation(self.activeShader,"dirLight"),1,glm.value_ptr(self.dirLight))
 
         for obj in self.scene:

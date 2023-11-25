@@ -36,13 +36,17 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
-uniform float fatness;
+uniform float time;
+uniform float fatnessFrecuency;
 
 out vec2 UVs;
 out vec3 outNormals;
 
 void main()
 {
+    float fatness = sin(fatnessFrecuency*time);
+    if (fatness < 0.0)
+        fatness = 0.0;
     outNormals  =(modelMatrix*vec4(normals,0.0)).xyz;
     outNormals = normalize(outNormals);
     vec3 pos = position+(fatness/4)*outNormals;
@@ -115,7 +119,7 @@ void main()
 
 '''
 
-siren_shader = '''
+colors_shader = '''
 #version 450 core
 
 layout (binding=0) uniform sampler2D tex;
@@ -170,7 +174,6 @@ void main()
 '''
 
 pencil_shader = '''
-// Referencia: https://webgl-shaders.com
 #version 450 core
 
 layout (binding=0) uniform sampler2D tex;
@@ -217,7 +220,6 @@ void main()
 '''
 
 dot_shader = '''
-// Referencia: https://webgl-shaders.com
 #version 450 core
 
 layout (binding=0) uniform sampler2D tex;
@@ -246,6 +248,26 @@ void main()
     surface_color = clamp(surface_color, 0.05, 1.0);
     
     fragColor = vec4(vec3(surface_color), 1.0);
+}
+
+'''
+
+yellow_glow_shader = '''
+#version 450 core
+
+layout (binding=0) uniform sampler2D tex;
+
+uniform vec3 dirLight;
+
+in vec2 UVs;
+in vec3 outNormals;
+
+out vec4 fragColor;
+
+void main()
+{
+    float intensity = dot(outNormals,-dirLight);
+    fragColor = texture(tex,UVs)*intensity;
 }
 
 '''
