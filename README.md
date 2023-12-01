@@ -1,4 +1,10 @@
 # Proyecto3-GPC
+:computer: Rasterizador OpenGL
+## Tecnologías
+- Python
+- OpenGL
+- PyGame
+- PyGLM
 ## Inputs
 ### Generales
 - Salir del programa    [ESC]
