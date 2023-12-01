@@ -1,5 +1,7 @@
 # Proyecto3-GPC
 :computer: Rasterizador OpenGL
+## Curso
+Gráficas por Computadora
 ## Tecnologías
 - Python
 - OpenGL
